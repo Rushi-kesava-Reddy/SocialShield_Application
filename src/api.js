@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Backend URL — set VITE_API_URL in frontend/.env to override
-export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export const BASE_URL = import.meta.env.VITE_API_URL || 'https://socialshield-backend.onrender.com';
 
 const api = axios.create({
   baseURL: BASE_URL,

@@ -98,7 +98,7 @@ export default function SettingsPage() {
           <Row label="Beta Features" desc="Enable experimental AI models" right={<Toggle id="beta" checked={prefs.betaFeatures} onChange={() => toggle('betaFeatures')} />} />
           <Row
             label="Backend URL"
-            desc={import.meta.env.VITE_API_URL || 'http://localhost:8000'}
+            desc={import.meta.env.VITE_API_URL || 'https://socialshield-backend.onrender.com'}
             right={<span style={{ fontSize:12, color:'var(--neon-cyan)' }}>●&nbsp;Connected</span>}
           />
         </Section>
