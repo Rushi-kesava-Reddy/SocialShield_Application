@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # ── Update this to your GitHub Pages URL ──
+  # ── GitHub Pages URL after deploy workflow publishes the built dist ──
   SITE_URL: "https://rushi-kesava-reddy.github.io/SocialShield_Application/"
   PYTHON_VERSION: "3.11"
 
