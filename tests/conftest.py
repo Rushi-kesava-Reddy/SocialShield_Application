@@ -108,7 +108,8 @@ def auth_driver():
         localStorage.setItem('ss_onboarded', '1');
     """, demo_user)
 
-    # Step 3: Navigate directly to /#/home (full page load with tokens pre-set)
+    # Step 3: Navigate via about:blank to force a full page reload of the origin with preset tokens
+    drv.get("about:blank")
     drv.get(BASE_URL + "/#/home")
 
     # Step 4: Wait for React to boot + ProtectedRoute to render home content

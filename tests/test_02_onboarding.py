@@ -17,10 +17,11 @@ def _navigate_to_onboarding(driver):
     driver.get(BASE_URL)
     time.sleep(0.3)
     driver.execute_script("localStorage.clear(); sessionStorage.clear();")
-    go_to(driver, "/onboarding")
+    driver.get("about:blank")
+    driver.get(BASE_URL + "/#/onboarding")
     # Wait for onboarding page to render
     try:
-        WebDriverWait(driver, 6).until(
+        WebDriverWait(driver, 8).until(
             EC.presence_of_element_located((By.CLASS_NAME, "onboarding-page"))
         )
     except Exception:

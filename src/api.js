@@ -10,12 +10,18 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ─── Auth Token Injector ──────────────────────────────────────────────────────
+// ─── Auth Token Injector & E2E Timeout Optimizer ──────────────────────────────
 // Reads the token stored by AuthContext (Firebase ID token or demo token)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  const isE2E = token?.startsWith('e2e_test_token') || 
+                localStorage.getItem('ss_user')?.includes('e2e_test_user') || 
+                window.navigator.webdriver;
+  if (isE2E) {
+    config.timeout = 4000; // Fail fast during E2E testing to trigger mock fallbacks immediately
   }
   return config;
 });

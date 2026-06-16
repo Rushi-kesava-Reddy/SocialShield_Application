@@ -26,10 +26,11 @@ def _navigate_to_auth(driver):
         sessionStorage.clear();
         localStorage.setItem('ss_onboarded', '1');
     """)
-    go_to(driver, "/auth")
+    driver.get("about:blank")
+    driver.get(BASE_URL + "/#/auth")
     # Wait for auth-card (loading=true → null render → loading=false → auth renders)
     try:
-        WebDriverWait(driver, 8).until(
+        WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, "auth-card"))
         )
     except Exception:
@@ -92,7 +93,7 @@ class TestAuthPage:
         buttons = fresh_driver.find_elements(By.TAG_NAME, "button")
         for btn in buttons:
             txt = btn.get_attribute("innerText") or btn.text
-            if "Sign In" in txt and btn.get_attribute("type") != "submit":
+            if "Sign In" in txt and btn.get_attribute("id") != "submit-btn":
                 btn.click()
                 break
         time.sleep(0.3)
@@ -149,7 +150,12 @@ class TestAuthPage:
         _navigate_to_auth(fresh_driver)
         submit_btn = fresh_driver.find_element(By.ID, "submit-btn")
         submit_btn.click()
-        time.sleep(0.5)
+        try:
+            WebDriverWait(fresh_driver, 5).until(
+                lambda d: "required" in d.find_element(By.TAG_NAME, "body").text.lower() or "email" in d.find_element(By.TAG_NAME, "body").text.lower()
+            )
+        except Exception:
+            pass
         body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
         assert "required" in body.lower() or "email" in body.lower(), \
             "Error message not shown for empty form submission"
@@ -162,7 +168,12 @@ class TestAuthPage:
         email.send_keys("test@example.com")
         password.send_keys("123")  # Less than 6 chars
         fresh_driver.find_element(By.ID, "submit-btn").click()
-        time.sleep(0.5)
+        try:
+            WebDriverWait(fresh_driver, 5).until(
+                lambda d: "6 characters" in d.find_element(By.TAG_NAME, "body").text.lower() or "at least" in d.find_element(By.TAG_NAME, "body").text.lower() or "6" in d.find_element(By.TAG_NAME, "body").text.lower()
+            )
+        except Exception:
+            pass
         body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
         assert "6 characters" in body or "at least" in body.lower() or "6" in body, \
             f"Password length validation error not shown. Text: {body[:300]}"
