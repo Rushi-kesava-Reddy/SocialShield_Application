@@ -37,8 +37,11 @@ def _setup_result_and_navigate(driver):
         },
         "timestamp": "2026-06-15T10:00:00.000Z"
     }
-    result_json = json.dumps(mock_result).replace("'", "\\'")
-    driver.execute_script(f"sessionStorage.setItem('scan_result_test_result_001', '{result_json}');")
+    result_json = json.dumps(mock_result)
+    driver.execute_script(
+        "sessionStorage.setItem('scan_result_test_result_001', arguments[0]);",
+        result_json
+    )
     go_to(driver, "/result/test_result_001")
     try:
         from selenium.webdriver.support.ui import WebDriverWait

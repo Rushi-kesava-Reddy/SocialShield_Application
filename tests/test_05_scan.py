@@ -190,7 +190,14 @@ class TestScanPage:
         time.sleep(0.3)
         scan_btn = auth_driver.find_element(By.ID, "scan-btn")
         scan_btn.click()
-        time.sleep(0.5)
+        time.sleep(0.3)
+        # Progress animation appears immediately when scan starts
+        try:
+            WebDriverWait(auth_driver, 8).until(
+                EC.text_to_be_present_in_element((By.TAG_NAME, "body"), "Analyzing")
+            )
+        except Exception:
+            pass
         body = auth_driver.find_element(By.TAG_NAME, "body").text
         assert "Analyzing" in body or "%" in body or "AI" in body, \
             "Progress animation not shown during scan"
@@ -203,11 +210,11 @@ class TestScanPage:
         time.sleep(0.3)
         scan_btn = auth_driver.find_element(By.ID, "scan-btn")
         scan_btn.click()
-        # Wait for redirect (mock scan takes ~1.2s + 0.4s delay = ~2s)
+        # Wait for redirect — mock scan: ~1.6s; real API cold start (Render): up to 60s
         try:
-            WebDriverWait(auth_driver, 8).until(EC.url_contains("result"))
+            WebDriverWait(auth_driver, 25).until(EC.url_contains("result"))
         except Exception:
-            time.sleep(4)
+            time.sleep(8)
         assert "result" in auth_driver.current_url, \
             f"Expected redirect to /result after scan, got: {auth_driver.current_url}"
 
