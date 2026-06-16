@@ -65,7 +65,7 @@ jobs:
     name: 🧪 Run Selenium E2E Tests
     needs: deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       # ── 1. Checkout ──
@@ -105,7 +105,7 @@ jobs:
         run: |
           echo "Waiting for GitHub Pages deployment to propagate..."
           SITE="${{ env.SITE_URL }}"
-          MAX_ATTEMPTS=20
+          MAX_ATTEMPTS=10
           SLEEP_SECONDS=15
           for i in $(seq 1 $MAX_ATTEMPTS); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$SITE" || echo "000")
@@ -126,15 +126,8 @@ jobs:
       - name: 🧪 Run E2E Tests
         env:
           SITE_URL: ${{ env.SITE_URL }}
-          DISPLAY: ":99"
         run: |
-          # Start virtual display for Chrome
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb > /dev/null 2>&1
-          Xvfb :99 -screen 0 1920x1080x24 &
-          # Give Xvfb a moment to initialize
-          sleep 2
-
+          # Chrome runs with --headless=new, so no Xvfb / DISPLAY needed
           pytest tests/ \
             --junitxml=test-results/results.xml \
             -v \
