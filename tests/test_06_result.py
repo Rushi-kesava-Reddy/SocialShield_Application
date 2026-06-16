@@ -40,7 +40,15 @@ def _setup_result_and_navigate(driver):
     result_json = json.dumps(mock_result).replace("'", "\\'")
     driver.execute_script(f"sessionStorage.setItem('scan_result_test_result_001', '{result_json}');")
     go_to(driver, "/result/test_result_001")
-    time.sleep(2)
+    try:
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        from selenium.webdriver.common.by import By
+        WebDriverWait(driver, 8).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "confidence-ring"))
+        )
+    except Exception:
+        time.sleep(3)
 
 
 @pytest.mark.result

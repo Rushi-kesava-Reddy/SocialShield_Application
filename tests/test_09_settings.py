@@ -12,9 +12,14 @@ from conftest import BASE_URL, go_to
 
 
 def _go_settings(driver):
-    """Navigate to settings page with auth."""
+    """Navigate to settings page with auth, wait for content to load."""
     go_to(driver, "/settings")
-    time.sleep(2)
+    try:
+        WebDriverWait(driver, 8).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "toggle-switch"))
+        )
+    except Exception:
+        time.sleep(3)
 
 
 @pytest.mark.settings

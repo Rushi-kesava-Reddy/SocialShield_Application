@@ -19,7 +19,12 @@ class TestResponsiveDesign:
         auth_driver.set_window_size(375, 812)
         time.sleep(0.5)
         go_to(auth_driver, "/home")
-        time.sleep(2)
+        try:
+            WebDriverWait(auth_driver, 8).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "sidebar"))
+            )
+        except Exception:
+            time.sleep(3)
         body = auth_driver.find_element(By.TAG_NAME, "body").text
         assert "Welcome" in body or "Scan" in body, \
             "App did not render on mobile viewport"
@@ -33,7 +38,12 @@ class TestResponsiveDesign:
         auth_driver.set_window_size(768, 1024)
         time.sleep(0.5)
         go_to(auth_driver, "/home")
-        time.sleep(2)
+        try:
+            WebDriverWait(auth_driver, 8).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "sidebar"))
+            )
+        except Exception:
+            time.sleep(3)
         body = auth_driver.find_element(By.TAG_NAME, "body").text
         assert "Welcome" in body or "Scan" in body, \
             "App did not render on tablet viewport"
@@ -44,7 +54,12 @@ class TestResponsiveDesign:
         auth_driver.set_window_size(1440, 900)
         time.sleep(0.5)
         go_to(auth_driver, "/home")
-        time.sleep(2)
+        try:
+            WebDriverWait(auth_driver, 8).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "sidebar"))
+            )
+        except Exception:
+            time.sleep(3)
         sidebar = auth_driver.find_elements(By.CLASS_NAME, "sidebar")
         assert len(sidebar) > 0, "Sidebar element not found"
         is_visible = auth_driver.execute_script(
@@ -60,7 +75,12 @@ class TestResponsiveDesign:
         auth_driver.set_window_size(1440, 900)
         time.sleep(0.5)
         go_to(auth_driver, "/home")
-        time.sleep(2)
+        try:
+            WebDriverWait(auth_driver, 8).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "sidebar"))
+            )
+        except Exception:
+            time.sleep(3)
         is_hidden = auth_driver.execute_script(
             "const el = document.querySelector('.mobile-nav'); "
             "if (!el) return true; "
@@ -74,7 +94,12 @@ class TestResponsiveDesign:
         auth_driver.set_window_size(375, 812)
         time.sleep(0.5)
         go_to(auth_driver, "/home")
-        time.sleep(2)
+        try:
+            WebDriverWait(auth_driver, 8).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "mobile-nav"))
+            )
+        except Exception:
+            time.sleep(3)
         is_hidden = auth_driver.execute_script(
             "const el = document.querySelector('.sidebar'); "
             "if (!el) return true; "
@@ -89,7 +114,12 @@ class TestResponsiveDesign:
         auth_driver.set_window_size(375, 812)
         time.sleep(0.5)
         go_to(auth_driver, "/home")
-        time.sleep(2)
+        try:
+            WebDriverWait(auth_driver, 8).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "scan-type-card"))
+            )
+        except Exception:
+            time.sleep(3)
         cards = auth_driver.find_elements(By.CLASS_NAME, "scan-type-card")
         if len(cards) >= 2:
             # On mobile, cards should be stacked (second card below first)
@@ -111,7 +141,12 @@ class TestResponsiveDesign:
             fresh_driver.set_window_size(width, height)
             time.sleep(0.3)
             go_to(fresh_driver, "/auth")
-            time.sleep(1.5)
+            try:
+                WebDriverWait(fresh_driver, 8).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, "auth-card"))
+                )
+            except Exception:
+                time.sleep(2)
             cards = fresh_driver.find_elements(By.CLASS_NAME, "auth-card")
             if len(cards) > 0:
                 card = cards[0]

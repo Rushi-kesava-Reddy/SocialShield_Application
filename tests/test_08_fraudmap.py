@@ -12,9 +12,14 @@ from conftest import BASE_URL, go_to
 
 
 def _go_map(driver):
-    """Navigate to fraud map page with auth."""
+    """Navigate to fraud map page with auth, wait for map container."""
     go_to(driver, "/map")
-    time.sleep(2)
+    try:
+        WebDriverWait(driver, 8).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "stat-card"))
+        )
+    except Exception:
+        time.sleep(3)
 
 
 @pytest.mark.fraudmap

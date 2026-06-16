@@ -50,7 +50,7 @@ def driver():
     except Exception:
         # Fallback: use system chrome/chromedriver
         drv = webdriver.Chrome(options=opts)
-    drv.implicitly_wait(5)
+    drv.implicitly_wait(8)
     drv.set_page_load_timeout(30)
     yield drv
     drv.quit()
@@ -66,7 +66,7 @@ def fresh_driver():
         drv = webdriver.Chrome(service=service, options=opts)
     except Exception:
         drv = webdriver.Chrome(options=opts)
-    drv.implicitly_wait(5)
+    drv.implicitly_wait(8)
     drv.set_page_load_timeout(30)
     yield drv
     drv.quit()
@@ -85,13 +85,20 @@ def auth_driver():
         drv = webdriver.Chrome(service=service, options=opts)
     except Exception:
         drv = webdriver.Chrome(options=opts)
-    drv.implicitly_wait(5)
+    drv.implicitly_wait(8)
     drv.set_page_load_timeout(30)
 
     # Navigate to the site first (required before setting localStorage)
-    drv.get(BASE_URL)
     import time
-    time.sleep(1)
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.common.by import By
+    drv.get(BASE_URL)
+    # Wait for JS to boot (body tag always exists once page loads)
+    try:
+        WebDriverWait(drv, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+    except Exception:
+        time.sleep(2)
 
     # Inject demo auth tokens into localStorage
     demo_user = json.dumps({

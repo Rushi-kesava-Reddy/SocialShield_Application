@@ -12,9 +12,14 @@ from conftest import BASE_URL, go_to
 
 
 def _go_history(driver):
-    """Navigate to history page with auth."""
+    """Navigate to history page with auth, wait for filter chips to load."""
     go_to(driver, "/history")
-    time.sleep(2)
+    try:
+        WebDriverWait(driver, 8).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "chip"))
+        )
+    except Exception:
+        time.sleep(3)
 
 
 @pytest.mark.history
