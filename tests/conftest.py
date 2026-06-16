@@ -1,10 +1,14 @@
 # ─── conftest.py — Shared Pytest Fixtures for Selenium E2E Tests ──────────────
 import os
 import json
+import time
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 # ─── Base URL ──────────────────────────────────────────────────────────────────
@@ -39,19 +43,26 @@ def _chrome_options():
     return opts
 
 
-# ─── Driver Fixture (module-scoped) ───────────────────────────────────────────
-@pytest.fixture(scope="module")
-def driver():
-    """Create a headless Chrome WebDriver for the test module."""
+# ─── Driver Factory ────────────────────────────────────────────────────────────
+def _make_driver():
+    """Create a headless Chrome WebDriver."""
     opts = _chrome_options()
     try:
         service = Service(ChromeDriverManager().install())
         drv = webdriver.Chrome(service=service, options=opts)
     except Exception:
-        # Fallback: use system chrome/chromedriver
+        # Fallback: use system chromedriver
         drv = webdriver.Chrome(options=opts)
-    drv.implicitly_wait(8)
-    drv.set_page_load_timeout(30)
+    drv.implicitly_wait(10)
+    drv.set_page_load_timeout(45)
+    return drv
+
+
+# ─── Driver Fixture (module-scoped) ───────────────────────────────────────────
+@pytest.fixture(scope="module")
+def driver():
+    """Create a headless Chrome WebDriver for the test module."""
+    drv = _make_driver()
     yield drv
     drv.quit()
 
@@ -60,14 +71,7 @@ def driver():
 @pytest.fixture(scope="function")
 def fresh_driver():
     """Create a fresh headless Chrome WebDriver per test function."""
-    opts = _chrome_options()
-    try:
-        service = Service(ChromeDriverManager().install())
-        drv = webdriver.Chrome(service=service, options=opts)
-    except Exception:
-        drv = webdriver.Chrome(options=opts)
-    drv.implicitly_wait(8)
-    drv.set_page_load_timeout(30)
+    drv = _make_driver()
     yield drv
     drv.quit()
 
@@ -78,45 +82,44 @@ def auth_driver():
     """
     Create a WebDriver pre-authenticated by injecting localStorage tokens.
     This bypasses Firebase auth for E2E testing on the static build.
+
+    After injecting tokens, navigates directly to /#/home and waits for
+    .scan-type-card to confirm the ProtectedRoute has loaded correctly.
     """
-    opts = _chrome_options()
-    try:
-        service = Service(ChromeDriverManager().install())
-        drv = webdriver.Chrome(service=service, options=opts)
-    except Exception:
-        drv = webdriver.Chrome(options=opts)
-    drv.implicitly_wait(8)
-    drv.set_page_load_timeout(30)
+    drv = _make_driver()
 
-    # Navigate to the site first (required before setting localStorage)
-    import time
-    from selenium.webdriver.support.ui import WebDriverWait
-    from selenium.webdriver.support import expected_conditions as EC
-    from selenium.webdriver.common.by import By
+    # Step 1: Navigate to the site to establish the origin context
     drv.get(BASE_URL)
-    # Wait for JS to boot (body tag always exists once page loads)
     try:
-        WebDriverWait(drv, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        WebDriverWait(drv, 15).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     except Exception:
-        time.sleep(2)
+        time.sleep(3)
 
-    # Inject demo auth tokens into localStorage
+    # Step 2: Inject demo auth tokens into localStorage
+    # Using execute_script with arguments[] avoids any Python f-string escaping issues
     demo_user = json.dumps({
         "uid": "e2e_test_user",
         "email": "e2e@socialshield.ai",
         "displayName": "E2E Tester"
     })
-    drv.execute_script(f"""
-        localStorage.setItem('ss_user', '{demo_user}');
-        localStorage.setItem('auth_token', 'e2e_test_token_{{}}'.replace('{{}}', Date.now()));
+    drv.execute_script("""
+        localStorage.setItem('ss_user', arguments[0]);
+        localStorage.setItem('auth_token', 'e2e_test_token_' + Date.now());
         localStorage.setItem('ss_onboarded', '1');
-    """)
-    # Force refresh so React initializes with these localStorage tokens
-    drv.refresh()
+    """, demo_user)
+
+    # Step 3: Navigate directly to /#/home (full page load with tokens pre-set)
+    drv.get(BASE_URL + "/#/home")
+
+    # Step 4: Wait for React to boot + ProtectedRoute to render home content
+    # This confirms auth is working before yielding to each test
     try:
-        WebDriverWait(drv, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+        WebDriverWait(drv, 15).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "scan-type-card"))
+        )
     except Exception:
-        time.sleep(2)
+        # Fallback: give extra time for slower CI environments
+        time.sleep(5)
 
     yield drv
     drv.quit()
@@ -129,7 +132,11 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
     if report.when == "call" and report.failed:
-        driver_fixture = item.funcargs.get("driver") or item.funcargs.get("auth_driver") or item.funcargs.get("fresh_driver")
+        driver_fixture = (
+            item.funcargs.get("driver")
+            or item.funcargs.get("auth_driver")
+            or item.funcargs.get("fresh_driver")
+        )
         if driver_fixture:
             screenshot_name = f"{item.nodeid.replace('::', '_').replace('/', '_')}.png"
             screenshot_path = os.path.join(SCREENSHOT_DIR, screenshot_name)
