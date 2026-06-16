@@ -1,5 +1,5 @@
 // ─── App Router ───────────────────────────────────────────────────────────────
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
 import SplashPage     from './pages/SplashPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -27,7 +27,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route path="/"           element={<SplashPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
@@ -42,7 +42,7 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   );
 }

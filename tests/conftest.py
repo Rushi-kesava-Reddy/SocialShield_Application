@@ -128,6 +128,12 @@ def pytest_runtest_makereport(item, call):
 
 # ─── Helper: navigate to a route ──────────────────────────────────────────────
 def go_to(driver, path=""):
-    """Navigate the driver to BASE_URL + path."""
-    url = f"{BASE_URL}/{path.lstrip('/')}" if path else BASE_URL
+    """Navigate the driver to BASE_URL + path with HashRouter support."""
+    if path:
+        if not path.startswith("#"):
+            url = f"{BASE_URL}/#/{path.lstrip('/')}"
+        else:
+            url = f"{BASE_URL}/{path}"
+    else:
+        url = BASE_URL
     driver.get(url)
