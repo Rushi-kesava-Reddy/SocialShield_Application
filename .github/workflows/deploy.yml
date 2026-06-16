@@ -111,12 +111,10 @@ jobs:
           sudo apt-get install -y -qq xvfb > /dev/null 2>&1
           Xvfb :99 -screen 0 1920x1080x24 &
 
-          # Run tests (continue even if some fail so we get the full report)
           pytest tests/ \
             --junitxml=test-results/results.xml \
             -v \
-            --tb=short \
-            || true
+            --tb=short
 
       # ── 8. Generate .xlsx Report ──
       - name: 📊 Generate Excel Report

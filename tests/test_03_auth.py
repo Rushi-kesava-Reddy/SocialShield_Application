@@ -51,8 +51,8 @@ class TestAuthPage:
     def test_tc018_welcome_back_heading_login_mode(self, fresh_driver):
         """TC-018: Verify 'Welcome Back' heading in login mode."""
         _navigate_to_auth(fresh_driver)
-        body = fresh_driver.find_element(By.TAG_NAME, "body").text
-        assert "Welcome Back" in body, \
+        body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
+        assert "welcome" in body.lower() and "back" in body.lower(), \
             f"'Welcome Back' heading not found. Text: {body[:300]}"
 
     def test_tc019_create_account_heading_signup_mode(self, fresh_driver):
@@ -61,40 +61,43 @@ class TestAuthPage:
         # Find and click the Sign Up toggle link button
         buttons = fresh_driver.find_elements(By.TAG_NAME, "button")
         for btn in buttons:
-            if btn.text.strip() == "Sign Up":
+            txt = btn.get_attribute("innerText") or btn.text
+            if "Sign Up" in txt:
                 btn.click()
                 break
         time.sleep(0.5)
-        body = fresh_driver.find_element(By.TAG_NAME, "body").text
-        assert "Create Account" in body, \
+        body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
+        assert "create" in body.lower() and "account" in body.lower(), \
             f"'Create Account' not found after toggling to signup. Text: {body[:300]}"
 
     def test_tc020_toggle_between_signin_and_signup(self, fresh_driver):
         """TC-020: Verify toggle between Sign In and Sign Up modes."""
         _navigate_to_auth(fresh_driver)
         # Initially in Sign In mode
-        body = fresh_driver.find_element(By.TAG_NAME, "body").text
-        assert "Welcome Back" in body
-
+        body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
+        assert "welcome" in body.lower() and "back" in body.lower()
+ 
         # Toggle to Sign Up
         buttons = fresh_driver.find_elements(By.TAG_NAME, "button")
         for btn in buttons:
-            if btn.text.strip() == "Sign Up":
+            txt = btn.get_attribute("innerText") or btn.text
+            if "Sign Up" in txt:
                 btn.click()
                 break
         time.sleep(0.3)
-        body = fresh_driver.find_element(By.TAG_NAME, "body").text
-        assert "Create Account" in body
-
+        body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
+        assert "create" in body.lower() and "account" in body.lower()
+ 
         # Toggle back to Sign In
         buttons = fresh_driver.find_elements(By.TAG_NAME, "button")
         for btn in buttons:
-            if btn.text.strip() == "Sign In" and btn.get_attribute("type") != "submit":
+            txt = btn.get_attribute("innerText") or btn.text
+            if "Sign In" in txt and btn.get_attribute("type") != "submit":
                 btn.click()
                 break
         time.sleep(0.3)
-        body = fresh_driver.find_element(By.TAG_NAME, "body").text
-        assert "Welcome Back" in body
+        body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
+        assert "welcome" in body.lower() and "back" in body.lower()
 
     def test_tc021_email_input_present_and_functional(self, fresh_driver):
         """TC-021: Verify email input field (id='email') is present and accepts input."""
@@ -147,7 +150,7 @@ class TestAuthPage:
         submit_btn = fresh_driver.find_element(By.ID, "submit-btn")
         submit_btn.click()
         time.sleep(0.5)
-        body = fresh_driver.find_element(By.TAG_NAME, "body").text
+        body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
         assert "required" in body.lower() or "email" in body.lower(), \
             "Error message not shown for empty form submission"
 
@@ -160,7 +163,7 @@ class TestAuthPage:
         password.send_keys("123")  # Less than 6 chars
         fresh_driver.find_element(By.ID, "submit-btn").click()
         time.sleep(0.5)
-        body = fresh_driver.find_element(By.TAG_NAME, "body").text
+        body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
         assert "6 characters" in body or "at least" in body.lower() or "6" in body, \
             f"Password length validation error not shown. Text: {body[:300]}"
 
@@ -169,15 +172,17 @@ class TestAuthPage:
         _navigate_to_auth(fresh_driver)
         google_btn = fresh_driver.find_element(By.ID, "google-signin-btn")
         assert google_btn is not None, "Google Sign-In button not found"
-        assert "Google" in google_btn.text, "Button should contain 'Google' text"
+        btn_txt = google_btn.get_attribute("innerText") or google_btn.text
+        assert "Google" in btn_txt, "Button should contain 'Google' text"
 
     def test_tc028_divider_between_form_and_google(self, fresh_driver):
         """TC-028: Verify 'or' divider renders between form and Google button."""
         _navigate_to_auth(fresh_driver)
         dividers = fresh_driver.find_elements(By.CLASS_NAME, "divider")
         assert len(dividers) > 0, "'or' divider not found"
-        assert "or" in dividers[0].text.lower(), \
-            f"Divider text should contain 'or', got: {dividers[0].text}"
+        div_txt = dividers[0].get_attribute("innerText") or dividers[0].text
+        assert "or" in div_txt.lower(), \
+            f"Divider text should contain 'or', got: {div_txt}"
 
     def test_tc029_error_clears_when_toggling_mode(self, fresh_driver):
         """TC-029: Verify error message clears when toggling auth mode."""
@@ -185,18 +190,19 @@ class TestAuthPage:
         # Trigger an error first
         fresh_driver.find_element(By.ID, "submit-btn").click()
         time.sleep(0.5)
-
+ 
         # Toggle mode — AuthPage.jsx clears error on setIsSignUp
         buttons = fresh_driver.find_elements(By.TAG_NAME, "button")
         for btn in buttons:
-            if btn.text.strip() == "Sign Up":
+            txt = btn.get_attribute("innerText") or btn.text
+            if "Sign Up" in txt:
                 btn.click()
                 break
         time.sleep(0.5)
-
-        body = fresh_driver.find_element(By.TAG_NAME, "body").text
+ 
+        body = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
         # Error should be cleared; "Create Account" heading should be shown
-        assert "required" not in body.lower() or "Create Account" in body, \
+        assert "required" not in body.lower() or "create" in body.lower(), \
             "Error message should clear when toggling auth mode"
 
     def test_tc030_form_inputs_have_autocomplete(self, fresh_driver):

@@ -111,6 +111,12 @@ def auth_driver():
         localStorage.setItem('auth_token', 'e2e_test_token_{{}}'.replace('{{}}', Date.now()));
         localStorage.setItem('ss_onboarded', '1');
     """)
+    # Force refresh so React initializes with these localStorage tokens
+    drv.refresh()
+    try:
+        WebDriverWait(drv, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+    except Exception:
+        time.sleep(2)
 
     yield drv
     drv.quit()

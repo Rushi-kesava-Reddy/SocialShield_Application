@@ -46,7 +46,7 @@ class TestSplashPage:
     def test_tc003_brand_text_displayed(self, fresh_driver):
         """TC-003: Verify 'SocialShield' brand text is displayed."""
         _load_splash(fresh_driver)
-        body_text = fresh_driver.find_element(By.TAG_NAME, "body").text
+        body_text = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
         # Brand renders as "Social" + "Shield" in separate text nodes
         assert "Social" in body_text or "Shield" in body_text, \
             f"Brand text not found on splash page. Body text: {body_text[:300]}"
@@ -54,7 +54,7 @@ class TestSplashPage:
     def test_tc004_subtitle_contains_ai(self, fresh_driver):
         """TC-004: Verify subtitle contains 'AI' or 'Fraud' or 'Detection' text."""
         _load_splash(fresh_driver)
-        body_text = fresh_driver.find_element(By.TAG_NAME, "body").text
+        body_text = fresh_driver.find_element(By.TAG_NAME, "body").get_attribute("innerText")
         # Splash subtitle: "AI-Powered Fraud & Deepfake Detection"
         assert "AI" in body_text or "Fraud" in body_text or "Detection" in body_text, \
             f"Subtitle text not found. Body: {body_text[:300]}"
@@ -81,7 +81,7 @@ class TestSplashPage:
         if splash_elements:
             # Dot indicators are divs with borderRadius style inside splash-page
             dots = splash_elements[0].find_elements(
-                By.XPATH, ".//div[contains(@style, 'borderRadius')]"
+                By.XPATH, ".//div[contains(@style, 'border-radius') or contains(@style, 'borderRadius')]"
             )
             assert len(dots) >= 3, f"Expected at least 3 dot indicators, found {len(dots)}"
         else:
