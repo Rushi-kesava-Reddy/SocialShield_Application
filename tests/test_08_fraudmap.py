@@ -43,7 +43,7 @@ class TestFraudMapPage:
         """TC-095: Verify 'Total Incidents' stat displays a value."""
         _go_map(auth_driver)
         body = auth_driver.find_element(By.TAG_NAME, "body").text
-        assert "Total Incidents" in body, "Total Incidents label not found"
+        assert "TOTAL INCIDENTS" in body, "Total Incidents label not found"
         assert "12,655" in body or "incidents" in body.lower(), \
             "Total Incidents value not displayed"
 

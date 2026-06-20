@@ -61,7 +61,7 @@ class TestSettingsPage:
         """TC-107: Verify Preferences section has 4 toggle switches."""
         _go_settings(auth_driver)
         body = auth_driver.find_element(By.TAG_NAME, "body").text
-        assert "Preferences" in body, "Preferences section not found"
+        assert "PREFERENCES" in body, "Preferences section not found"
         toggle_switches = auth_driver.find_elements(By.CLASS_NAME, "toggle-switch")
         # At least 4 in Preferences + 2 in Advanced = 6 total
         assert len(toggle_switches) >= 4, \
@@ -101,7 +101,7 @@ class TestSettingsPage:
         """TC-111: Verify AI Models section lists 4 models."""
         _go_settings(auth_driver)
         body = auth_driver.find_element(By.TAG_NAME, "body").text
-        assert "AI Models" in body, "AI Models section not found"
+        assert "AI MODELS" in body, "AI Models section not found"
         models = ["EfficientNet", "CNN Temporal", "Mel-CNN", "DistilBERT"]
         found = sum(1 for m in models if m in body)
         assert found >= 4, f"Expected 4 AI models, found {found}"
@@ -125,5 +125,5 @@ class TestSettingsPage:
         """TC-114: Verify 'Clear History' button is in Danger Zone."""
         _go_settings(auth_driver)
         body = auth_driver.find_element(By.TAG_NAME, "body").text
-        assert "Danger Zone" in body, "Danger Zone section not found"
+        assert "DANGER ZONE" in body, "Danger Zone section not found"
         assert "Clear History" in body, "Clear History button not found"
