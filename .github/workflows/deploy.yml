@@ -1,0 +1,197 @@
+# ─── GitHub Actions: Build, Deploy & E2E Test ──────────────────────────────────
+# Runs on every push to main — builds/deploys the app and runs sequential E2E tests.
+
+name: 🚀 Build, Deploy & Test
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+# Allow only one run at a time
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  SITE_URL: "https://rushi-kesava-reddy.github.io/SocialShield_Application/"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  build:
+    name: 🏗️ Build Vite App
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: 📦 Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: 🔨 Build
+        run: npm run build
+        env:
+          VITE_API_URL: "https://socialshield-backend.onrender.com"
+
+      - name: 📤 Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+  deploy:
+    name: 🌐 Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  e2e-tests:
+    name: 🧪 Run Selenium E2E Tests
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      # ── 1. Checkout ──
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Setup Python ──
+      - name: 🐍 Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+          cache-dependency-path: tests/requirements.txt
+
+      # ── 3. Install Chrome ──
+      - name: 🌐 Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      # ── 4. Install ChromeDriver ──
+      - name: 🔧 Setup ChromeDriver
+        uses: nanasess/setup-chromedriver@v2
+
+      # ── 5. Install Python dependencies ──
+      - name: 📦 Install test dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r tests/requirements.txt
+
+      # ── 6. Create test results directory ──
+      - name: 📁 Create results directory
+        run: mkdir -p test-results/screenshots
+
+      # ── 7. Wait for GitHub Pages CDN to propagate ──
+      - name: ⏳ Wait for GitHub Pages to be live
+        run: |
+          echo "Waiting for GitHub Pages deployment to propagate..."
+          SITE="${{ env.SITE_URL }}"
+          MAX_ATTEMPTS=10
+          SLEEP_SECONDS=15
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$SITE" || echo "000")
+            echo "Attempt $i/$MAX_ATTEMPTS: HTTP $STATUS for $SITE"
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Site is live and returning HTTP 200!"
+              break
+            fi
+            if [ $i -eq $MAX_ATTEMPTS ]; then
+              echo "⚠️ Site did not return 200 after $MAX_ATTEMPTS attempts. Continuing anyway..."
+            else
+              echo "   Waiting ${SLEEP_SECONDS}s before next attempt..."
+              sleep $SLEEP_SECONDS
+            fi
+          done
+
+      # ── 8. Run Selenium E2E Tests ──
+      - name: 🧪 Run E2E Tests
+        env:
+          SITE_URL: ${{ env.SITE_URL }}
+        run: |
+          # Chrome runs with --headless=new, so no Xvfb / DISPLAY needed
+          pytest tests/ \
+            --junitxml=test-results/results.xml \
+            -v \
+            --tb=long
+
+      # ── 8. Generate .xlsx Report ──
+      - name: 📊 Generate Excel Report
+        if: always()
+        run: python tests/generate_report.py
+
+      # ── 9. Upload Test Report (.xlsx) ──
+      - name: 📤 Upload E2E Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: E2E-Test-Report-SocialShield
+          path: test-results/E2E_Test_Report_SocialShield_*.xlsx
+          retention-days: 30
+          if-no-files-found: warn
+
+      # ── 10. Upload Screenshots (on failure) ──
+      - name: 📸 Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: E2E-Failure-Screenshots
+          path: test-results/screenshots/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      # ── 11. Upload JUnit XML ──
+      - name: 📄 Upload JUnit XML Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: JUnit-XML-Results
+          path: test-results/results.xml
+          retention-days: 30
+          if-no-files-found: warn
+
+      # ── 12. Print Test Summary ──
+      - name: 📋 Print Test Summary
+        if: always()
+        run: |
+          echo "═══════════════════════════════════════════════════"
+          echo "  🛡️ SOCIALSHIELD E2E TEST RESULTS"
+          echo "═══════════════════════════════════════════════════"
+          if [ -f test-results/results.xml ]; then
+            TOTAL=$(grep -c '<testcase' test-results/results.xml || echo "0")
+            FAILURES=$(grep -c '<failure' test-results/results.xml || echo "0")
+            ERRORS=$(grep -c '<error' test-results/results.xml || echo "0")
+            SKIPPED=$(grep -c '<skipped' test-results/results.xml || echo "0")
+            PASSED=$((TOTAL - FAILURES - ERRORS - SKIPPED))
+            echo "  Total:    $TOTAL"
+            echo "  Passed:   $PASSED ✅"
+            echo "  Failed:   $((FAILURES + ERRORS)) ❌"
+            echo "  Skipped:  $SKIPPED ⏭️"
+            if [ $TOTAL -gt 0 ]; then
+              RATE=$(( PASSED * 100 / TOTAL ))
+              echo "  Pass Rate: ${RATE}%"
+            fi
+          else
+            echo "  ⚠️ No results XML found"
+          fi
+          echo "═══════════════════════════════════════════════════"
+          echo ""
+          echo "📥 Download the .xlsx report from the 'Artifacts' section above."
