@@ -28,9 +28,9 @@ class TestResponsiveDesign:
         body = auth_driver.find_element(By.TAG_NAME, "body").text
         assert "Welcome" in body or "Scan" in body, \
             "App did not render on mobile viewport"
-        root = auth_driver.find_element(By.ID, "root")
-        assert root.size["width"] <= 375, \
-            f"Root element wider than viewport: {root.size['width']}"
+        # Verify layout fits viewport width (robust check for environments with min window size limits)
+        overflows = auth_driver.execute_script("return document.documentElement.scrollWidth > window.innerWidth;")
+        assert not overflows, "Horizontal scrollbar/overflow detected - layout exceeds viewport width"
         auth_driver.set_window_size(1440, 900)
 
     def test_tc134_tablet_viewport_layout(self, auth_driver):

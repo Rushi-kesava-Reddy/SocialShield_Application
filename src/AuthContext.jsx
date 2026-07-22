@@ -12,8 +12,14 @@ const hasFirebaseConfig = !!(
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
-  const [user, setUser]                 = useState(null);
-  const [loading, setLoading]           = useState(true);
+  const [user, setUser]                 = useState(() => {
+    const stored = localStorage.getItem('ss_user');
+    if (stored) {
+      try { return JSON.parse(stored); } catch { /* ignore */ }
+    }
+    return null;
+  });
+  const [loading]                       = useState(false);
   const [backendOnline, setBackendOnline] = useState(null);
 
   // Backend health check on mount
@@ -21,15 +27,6 @@ export function AuthProvider({ children }) {
     healthCheck()
       .then(() => setBackendOnline(true))
       .catch(() => setBackendOnline(false));
-  }, []);
-
-  // Restore session from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('ss_user');
-    if (stored) {
-      try { setUser(JSON.parse(stored)); } catch {}
-    }
-    setLoading(false);
   }, []);
 
   // ─── Internal setter ─────────────────────────────────────────────────────────
@@ -132,7 +129,9 @@ export function AuthProvider({ children }) {
         const { getApps }  = await import('firebase/app');
         const { getAuth, signOut } = await import('firebase/auth');
         if (getApps().length) await signOut(getAuth(getApps()[0]));
-      } catch {}
+      } catch {
+        /* ignore error during signout */
+      }
     }
     localStorage.removeItem('auth_token');
     localStorage.removeItem('ss_user');
@@ -146,4 +145,5 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

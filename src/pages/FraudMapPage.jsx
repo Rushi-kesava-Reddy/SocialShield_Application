@@ -1,6 +1,5 @@
 // ─── Fraud Map Page ───────────────────────────────────────────────────────────
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const REGIONS = [
   { name: 'North America', incidents: 1842, trend: '+12%', risk: 'HIGH',   color: '#FF3B3B', x: 18, y: 28 },
@@ -23,7 +22,6 @@ const INCIDENT_TYPES = [
 
 export default function FraudMapPage() {
   const [selected, setSelected] = useState(null);
-  const navigate = useNavigate();
 
   return (
     <div>

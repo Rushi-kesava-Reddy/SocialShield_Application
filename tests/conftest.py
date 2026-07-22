@@ -16,8 +16,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 #   https://rushi-kesava-reddy.github.io/SocialShield_Application/
 BASE_URL = os.environ.get("SITE_URL", "https://rushi-kesava-reddy.github.io/SocialShield_Application/")
 
-# Remove trailing slash for consistency
-BASE_URL = BASE_URL.rstrip("/")
+# Ensure base URL ends with a trailing slash for proper local Vite server routing
+if not BASE_URL.endswith("/"):
+    BASE_URL += "/"
 
 
 # ─── Screenshot directory ─────────────────────────────────────────────────────
@@ -152,9 +153,9 @@ def go_to(driver, path=""):
     """Navigate the driver to BASE_URL + path with HashRouter support."""
     if path:
         if not path.startswith("#"):
-            url = f"{BASE_URL}/#/{path.lstrip('/')}"
+            url = f"{BASE_URL}#/{path.lstrip('/')}"
         else:
-            url = f"{BASE_URL}/{path}"
+            url = f"{BASE_URL}{path.lstrip('/')}"
     else:
         url = BASE_URL
     driver.get(url)

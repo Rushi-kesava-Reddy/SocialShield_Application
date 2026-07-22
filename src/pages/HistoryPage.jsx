@@ -26,19 +26,30 @@ export default function HistoryPage() {
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const load = (type) => {
-    setLoading(true);
-    getHistory(type === 'ALL' ? null : type)
-      .then((r) => setScans(r.data?.items || []))
-      .catch(() => setScans(type === 'ALL' ? DEMO_SCANS : DEMO_SCANS.filter((s) => s.mediaType === type)))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { load(filter); }, [filter]);
+  useEffect(() => {
+    let active = true;
+    // We do not set loading=true synchronously here; instead loading defaults to true,
+    // and is set to true in the event handlers when the filter is clicked.
+    getHistory(filter === 'ALL' ? null : filter)
+      .then((r) => {
+        if (active) setScans(r.data?.items || []);
+      })
+      .catch(() => {
+        if (active) setScans(filter === 'ALL' ? DEMO_SCANS : DEMO_SCANS.filter((s) => s.mediaType === filter));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [filter]);
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    try { await deleteScan(id); } catch {}
+    try {
+      await deleteScan(id);
+    } catch {
+      /* ignore delete errors, fall back to removing local scan state */
+    }
     setScans((prev) => prev.filter((s) => s.scanId !== id));
   };
 
@@ -53,7 +64,7 @@ export default function HistoryPage() {
       <div className="section" style={{ paddingBottom: 0 }}>
         <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:20 }}>
           {FILTERS.map((f) => (
-            <button key={f} id={`filter-${f.toLowerCase()}`} className={`chip ${filter===f?'active':''}`} onClick={() => setFilter(f)}>
+            <button key={f} id={`filter-${f.toLowerCase()}`} className={`chip ${filter===f?'active':''}`} onClick={() => { setFilter(f); setLoading(true); }}>
               {f === 'ALL' ? '🌐 All' : `${ICONS[f]} ${f}`}
             </button>
           ))}

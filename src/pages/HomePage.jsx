@@ -74,7 +74,7 @@ export default function HomePage() {
         </div>
 
         {/* Quick stats */}
-        <div className="grid-3" style={{ marginTop: 20, gridTemplateColumns: 'repeat(3,1fr)' }}>
+        <div className="grid-3" style={{ marginTop: 20 }}>
           {[
             { label: 'Total Scans', value: stats.totalScans, color: '#00D4FF' },
             { label: 'Fake Detected', value: stats.fakeDetected, color: '#FF3B3B' },

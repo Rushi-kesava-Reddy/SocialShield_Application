@@ -64,30 +64,65 @@ function RiskBars({ risk }) {
 export default function ResultPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [prevId, setPrevId] = useState(id);
+  const [result, setResult] = useState(() => {
+    const cached = sessionStorage.getItem('scan_result_' + id);
+    if (cached) {
+      try { return JSON.parse(cached); } catch { /* ignore */ }
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(() => {
+    const cached = sessionStorage.getItem('scan_result_' + id);
+    return !cached;
+  });
   const [showHeatmap, setShowHeatmap] = useState(false);
 
-  useEffect(() => {
-    // Try session cache first (from scan page)
+  // Sync state if id changes (React recommended pattern for state alignment)
+  if (id !== prevId) {
+    setPrevId(id);
     const cached = sessionStorage.getItem('scan_result_' + id);
-    if (cached) { setResult(JSON.parse(cached)); setLoading(false); return; }
+    if (cached) {
+      try {
+        setResult(JSON.parse(cached));
+        setLoading(false);
+      } catch {
+        setResult(null);
+        setLoading(true);
+      }
+    } else {
+      setResult(null);
+      setLoading(true);
+    }
+  }
 
+  useEffect(() => {
+    if (!loading || result !== null) return;
+
+    let active = true;
     getScanDetail(id)
-      .then((r) => setResult(r.data))
-      .catch(() => {
-        // Demo fallback
-        setResult({
-          scanId: id, verdict: 'FAKE', confidence: 94.2,
-          fakeProbability: 94.2, realProbability: 5.8,
-          riskLevel: 'HIGH', mediaType: 'IMAGE',
-          explanations: ['Facial boundary inconsistencies detected around left cheek', 'Unnatural blinking frequency pattern (0.2hz vs normal 0.3hz)', 'GAN artifacts in high-frequency spatial regions', 'Asymmetric skin texture under chin'],
-          metadata: { face_count: 1, resolution: '1080x1920', model: 'EfficientNet-B4', processing_time: '2.3s' },
-          timestamp: new Date().toISOString(),
-        });
+      .then((r) => {
+        if (active) setResult(r.data);
       })
-      .finally(() => setLoading(false));
-  }, [id]);
+      .catch(() => {
+        if (active) {
+          // Demo fallback
+          setResult({
+            scanId: id, verdict: 'FAKE', confidence: 94.2,
+            fakeProbability: 94.2, realProbability: 5.8,
+            riskLevel: 'HIGH', mediaType: 'IMAGE',
+            explanations: ['Facial boundary inconsistencies detected around left cheek', 'Unnatural blinking frequency pattern (0.2hz vs normal 0.3hz)', 'GAN artifacts in high-frequency spatial regions', 'Asymmetric skin texture under chin'],
+            metadata: { face_count: 1, resolution: '1080x1920', model: 'EfficientNet-B4', processing_time: '2.3s' },
+            timestamp: new Date().toISOString(),
+          });
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => { active = false; };
+  }, [id, loading, result]);
 
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh' }}>
