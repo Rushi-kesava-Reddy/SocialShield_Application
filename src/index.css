@@ -703,3 +703,91 @@ html, body, #root {
 /* ─── Section spacing ────────────────────────────────────────────────────── */
 .section { padding: 0 28px 28px; }
 @media (max-width: 600px) { .section { padding: 0 16px 20px; } .page-header { padding: 20px 16px 0; } }
+
+/* ─── Premium Light Theme Overrides ─────────────────────────────────────── */
+html.light-theme {
+  --deep-black:   #f4f6fc;
+  --dark-surface: #ffffff;
+  --dark-card:    #eef2f9;
+  --dark-elevated:#e2e8f0;
+  --glass-white:  rgba(0, 0, 0, 0.03);
+  --glass-border: rgba(0, 0, 0, 0.08);
+}
+
+html.light-theme,
+html.light-theme body,
+html.light-theme #root {
+  color: #0c0f1d;
+  background: var(--deep-black);
+}
+
+html.light-theme h1,
+html.light-theme h2,
+html.light-theme h3,
+html.light-theme h4,
+html.light-theme .sidebar-logo span,
+html.light-theme .nav-item.active,
+html.light-theme .page-header h1,
+html.light-theme .stat-card .stat-value,
+html.light-theme .scan-type-card h3,
+html.light-theme .history-item div {
+  color: #0c0f1d !important;
+}
+
+html.light-theme p,
+html.light-theme .page-header p,
+html.light-theme .stat-label,
+html.light-theme .scan-type-card p,
+html.light-theme .nav-item {
+  color: rgba(12, 15, 29, 0.6) !important;
+}
+
+html.light-theme .topbar {
+  background: rgba(244, 246, 252, 0.85);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+html.light-theme .glass-card,
+html.light-theme .stat-card,
+html.light-theme .scan-type-card,
+html.light-theme .history-item,
+html.light-theme .trust-score-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+html.light-theme .history-item:hover,
+html.light-theme .scan-type-card:hover,
+html.light-theme .stat-card:hover {
+  border-color: var(--neon-blue);
+  background: rgba(0, 212, 255, 0.02);
+}
+
+html.light-theme input,
+html.light-theme textarea,
+html.light-theme .input-field {
+  background: #ffffff !important;
+  color: #0c0f1d !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+}
+
+html.light-theme .chip {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0c0f1d;
+}
+
+html.light-theme .chip.active {
+  background: var(--neon-blue);
+  color: #ffffff !important;
+}
+
+html.light-theme .divider {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+html.light-theme .sidebar {
+  background: #ffffff;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+

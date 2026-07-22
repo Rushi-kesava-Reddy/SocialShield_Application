@@ -89,6 +89,16 @@ export default function ScanPage() {
       setProgress(100);
       // Cache result and navigate
       sessionStorage.setItem('scan_result_' + result.data.scanId, JSON.stringify(result.data));
+      
+      // Save to local history for demo/offline fallback persistence
+      try {
+        const localHistory = JSON.parse(localStorage.getItem('ss_local_history') || '[]');
+        localHistory.unshift(result.data);
+        localStorage.setItem('ss_local_history', JSON.stringify(localHistory));
+      } catch {
+        /* ignore storage full/parse errors */
+      }
+
       setTimeout(() => navigate(`/result/${result.data.scanId}`), 400);
     } catch (e) {
       clearInterval(iv);

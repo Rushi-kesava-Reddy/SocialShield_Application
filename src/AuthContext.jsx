@@ -4,10 +4,18 @@ import { healthCheck } from './api';
 
 const AuthContext = createContext(null);
 
-// Check if Firebase env vars are configured
+// Check if Firebase env vars are configured (safeguarded against stringified 'undefined'/'null' defaults)
 const hasFirebaseConfig = !!(
   import.meta.env.VITE_FIREBASE_API_KEY &&
-  import.meta.env.VITE_FIREBASE_PROJECT_ID
+  import.meta.env.VITE_FIREBASE_API_KEY !== 'undefined' &&
+  import.meta.env.VITE_FIREBASE_API_KEY !== 'null' &&
+  import.meta.env.VITE_FIREBASE_API_KEY !== 'placeholder' &&
+  import.meta.env.VITE_FIREBASE_API_KEY.trim() !== '' &&
+  import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+  import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'undefined' &&
+  import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'null' &&
+  import.meta.env.VITE_FIREBASE_PROJECT_ID !== 'placeholder' &&
+  import.meta.env.VITE_FIREBASE_PROJECT_ID.trim() !== ''
 );
 
 // ─── Provider ─────────────────────────────────────────────────────────────────

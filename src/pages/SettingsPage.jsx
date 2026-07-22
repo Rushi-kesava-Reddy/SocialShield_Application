@@ -39,18 +39,41 @@ export default function SettingsPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [prefs, setPrefs] = useState({
-    darkMode:       true,
-    notifications:  true,
-    autoScan:       false,
-    saveHistory:    true,
-    highQuality:    false,
-    betaFeatures:   false,
+  const [prefs, setPrefs] = useState(() => {
+    const localDark = localStorage.getItem('ss_theme_dark');
+    const isDark = localDark !== null ? localDark === '1' : true;
+    return {
+      darkMode:       isDark,
+      notifications:  true,
+      autoScan:       false,
+      saveHistory:    true,
+      highQuality:    false,
+      betaFeatures:   false,
+    };
   });
 
-  const toggle = (key) => setPrefs((p) => ({ ...p, [key]: !p[key] }));
+  const toggle = (key) => {
+    setPrefs((p) => {
+      const newVal = !p[key];
+      if (key === 'darkMode') {
+        localStorage.setItem('ss_theme_dark', newVal ? '1' : '0');
+        if (newVal) {
+          document.documentElement.classList.remove('light-theme');
+        } else {
+          document.documentElement.classList.add('light-theme');
+        }
+      }
+      return { ...p, [key]: newVal };
+    });
+  };
 
   const handleLogout = () => { logout(); navigate('/auth'); };
+  const handleClearHistory = () => {
+    if (window.confirm("Are you sure you want to clear your local scan history? This action cannot be undone.")) {
+      localStorage.removeItem('ss_local_history');
+      alert("Local scan history cleared successfully.");
+    }
+  };
 
   const MODELS = [
     { name: 'EfficientNet-B4', purpose: 'Image Deepfake', acc: '95%', color: '#00D4FF' },
@@ -134,7 +157,7 @@ export default function SettingsPage() {
             Danger Zone
           </h3>
           <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-            <button className="btn-neon" style={{ background:'rgba(255,59,59,0.12)', color:'var(--risk-high)', border:'1px solid rgba(255,59,59,0.3)', boxShadow:'none', height:40, fontSize:13 }}>
+            <button className="btn-neon" style={{ background:'rgba(255,59,59,0.12)', color:'var(--risk-high)', border:'1px solid rgba(255,59,59,0.3)', boxShadow:'none', height:40, fontSize:13 }} onClick={handleClearHistory}>
               🗑️ Clear History
             </button>
             <button id="logout-btn" className="btn-neon" style={{ background:'rgba(255,59,59,0.12)', color:'var(--risk-high)', border:'1px solid rgba(255,59,59,0.3)', boxShadow:'none', height:40, fontSize:13 }} onClick={handleLogout}>

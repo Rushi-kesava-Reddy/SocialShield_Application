@@ -28,14 +28,17 @@ export default function HistoryPage() {
 
   useEffect(() => {
     let active = true;
-    // We do not set loading=true synchronously here; instead loading defaults to true,
-    // and is set to true in the event handlers when the filter is clicked.
     getHistory(filter === 'ALL' ? null : filter)
       .then((r) => {
         if (active) setScans(r.data?.items || []);
       })
       .catch(() => {
-        if (active) setScans(filter === 'ALL' ? DEMO_SCANS : DEMO_SCANS.filter((s) => s.mediaType === filter));
+        let local = [];
+        try {
+          local = JSON.parse(localStorage.getItem('ss_local_history') || '[]');
+        } catch { /* ignore parse errors */ }
+        const allScans = [...local, ...DEMO_SCANS];
+        if (active) setScans(filter === 'ALL' ? allScans : allScans.filter((s) => s.mediaType === filter));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -50,6 +53,14 @@ export default function HistoryPage() {
     } catch {
       /* ignore delete errors, fall back to removing local scan state */
     }
+    
+    // Also delete from local history
+    try {
+      const local = JSON.parse(localStorage.getItem('ss_local_history') || '[]');
+      const filtered = local.filter((s) => s.scanId !== id);
+      localStorage.setItem('ss_local_history', JSON.stringify(filtered));
+    } catch { /* ignore */ }
+
     setScans((prev) => prev.filter((s) => s.scanId !== id));
   };
 
