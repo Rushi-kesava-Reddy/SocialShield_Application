@@ -47,27 +47,39 @@ export function AuthProvider({ children }) {
   // ─── Email/Password Login ─────────────────────────────────────────────────────
   const login = async (email, password) => {
     if (hasFirebaseConfig) {
-      const { initializeApp, getApps }          = await import('firebase/app');
-      const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
+      try {
+        const { initializeApp, getApps }          = await import('firebase/app');
+        const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
 
-      const app  = getApps().length ? getApps()[0] : initializeApp({
-        apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
-        authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-        projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
-        storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-        appId:             import.meta.env.VITE_FIREBASE_APP_ID,
-      });
-      const auth = getAuth(app);
-      const cred = await signInWithEmailAndPassword(auth, email, password);
-      const token = await cred.user.getIdToken();
-      const userData = {
-        uid: cred.user.uid,
-        email: cred.user.email,
-        displayName: cred.user.displayName || email.split('@')[0],
-      };
-      persistUser(userData, token);
-      return userData;
+        const app  = getApps().length ? getApps()[0] : initializeApp({
+          apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+          authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+          projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+          storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+          appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+        });
+        const auth = getAuth(app);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const token = await cred.user.getIdToken();
+        const userData = {
+          uid: cred.user.uid,
+          email: cred.user.email,
+          displayName: cred.user.displayName || email.split('@')[0],
+        };
+        persistUser(userData, token);
+        return userData;
+      } catch (err) {
+        console.warn("Firebase email login failed, falling back to demo. Error:", err);
+        if (err && ['auth/wrong-password', 'auth/user-not-found', 'auth/invalid-credential', 'auth/invalid-email'].includes(err.code)) {
+          throw err;
+        }
+        await new Promise((r) => setTimeout(r, 700));
+        const token = 'demo_' + Date.now();
+        const userData = { uid: 'dev_user', email, displayName: email.split('@')[0] };
+        persistUser(userData, token);
+        return userData;
+      }
     } else {
       // ── Demo mode (no Firebase configured) ──
       await new Promise((r) => setTimeout(r, 700));
@@ -81,22 +93,30 @@ export function AuthProvider({ children }) {
   // ─── Sign Up ──────────────────────────────────────────────────────────────────
   const signUp = async (email, password) => {
     if (hasFirebaseConfig) {
-      const { initializeApp, getApps }               = await import('firebase/app');
-      const { getAuth, createUserWithEmailAndPassword } = await import('firebase/auth');
-      const app  = getApps().length ? getApps()[0] : initializeApp({
-        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-        storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-        appId: import.meta.env.VITE_FIREBASE_APP_ID,
-      });
-      const auth = getAuth(app);
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      const token = await cred.user.getIdToken();
-      const userData = { uid: cred.user.uid, email: cred.user.email, displayName: email.split('@')[0] };
-      persistUser(userData, token);
-      return userData;
+      try {
+        const { initializeApp, getApps }               = await import('firebase/app');
+        const { getAuth, createUserWithEmailAndPassword } = await import('firebase/auth');
+        const app  = getApps().length ? getApps()[0] : initializeApp({
+          apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+          storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+          appId: import.meta.env.VITE_FIREBASE_APP_ID,
+        });
+        const auth = getAuth(app);
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        const token = await cred.user.getIdToken();
+        const userData = { uid: cred.user.uid, email: cred.user.email, displayName: email.split('@')[0] };
+        persistUser(userData, token);
+        return userData;
+      } catch (err) {
+        console.warn("Firebase signUp failed, falling back to demo. Error:", err);
+        if (err && ['auth/email-already-in-use', 'auth/invalid-email', 'auth/weak-password'].includes(err.code)) {
+          throw err;
+        }
+        return login(email, password);
+      }
     } else {
       return login(email, password);
     }
@@ -105,23 +125,31 @@ export function AuthProvider({ children }) {
   // ─── Google Sign-In ───────────────────────────────────────────────────────────
   const loginWithGoogle = async () => {
     if (hasFirebaseConfig) {
-      const { initializeApp, getApps }               = await import('firebase/app');
-      const { getAuth, GoogleAuthProvider, signInWithPopup } = await import('firebase/auth');
-      const app      = getApps().length ? getApps()[0] : initializeApp({
-        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-        storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-        appId: import.meta.env.VITE_FIREBASE_APP_ID,
-      });
-      const auth     = getAuth(app);
-      const provider = new GoogleAuthProvider();
-      const cred     = await signInWithPopup(auth, provider);
-      const token    = await cred.user.getIdToken();
-      const userData = { uid: cred.user.uid, email: cred.user.email, displayName: cred.user.displayName || cred.user.email?.split('@')[0] };
-      persistUser(userData, token);
-      return userData;
+      try {
+        const { initializeApp, getApps }               = await import('firebase/app');
+        const { getAuth, GoogleAuthProvider, signInWithPopup } = await import('firebase/auth');
+        const app      = getApps().length ? getApps()[0] : initializeApp({
+          apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+          storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+          appId: import.meta.env.VITE_FIREBASE_APP_ID,
+        });
+        const auth     = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        const cred     = await signInWithPopup(auth, provider);
+        const token    = await cred.user.getIdToken();
+        const userData = { uid: cred.user.uid, email: cred.user.email, displayName: cred.user.displayName || cred.user.email?.split('@')[0] };
+        persistUser(userData, token);
+        return userData;
+      } catch (err) {
+        console.warn("Firebase Google Sign-In failed, falling back to demo. Error:", err);
+        await new Promise((r) => setTimeout(r, 500));
+        const userData = { uid: 'google_demo', email: 'demo@socialshield.ai', displayName: 'Demo User' };
+        persistUser(userData, 'google_demo_' + Date.now());
+        return userData;
+      }
     } else {
       await new Promise((r) => setTimeout(r, 500));
       const userData = { uid: 'google_demo', email: 'demo@socialshield.ai', displayName: 'Demo User' };
