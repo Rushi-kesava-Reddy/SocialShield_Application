@@ -145,11 +145,8 @@ export function AuthProvider({ children }) {
         persistUser(userData, token);
         return userData;
       } catch (err) {
-        console.warn("Firebase Google Sign-In failed, falling back to demo. Error:", err);
-        await new Promise((r) => setTimeout(r, 500));
-        const userData = { uid: 'google_demo', email: 'demo@socialshield.ai', displayName: 'Demo User' };
-        persistUser(userData, 'google_demo_' + Date.now());
-        return userData;
+        console.error("Firebase Google Sign-In failed:", err);
+        throw err;
       }
     } else {
       await new Promise((r) => setTimeout(r, 500));
