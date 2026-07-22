@@ -30,7 +30,16 @@ export default function HistoryPage() {
     let active = true;
     getHistory(filter === 'ALL' ? null : filter)
       .then((r) => {
-        if (active) setScans(r.data?.items || []);
+        if (active) {
+          const items = (r.data?.items || []).map(s => ({
+            scanId: s.scanId !== undefined ? s.scanId : (s.scan_id !== undefined ? s.scan_id : ''),
+            mediaType: s.mediaType !== undefined ? s.mediaType : (s.media_type !== undefined ? s.media_type : 'UNKNOWN'),
+            verdict: s.verdict !== undefined ? s.verdict : '',
+            confidence: s.confidence !== undefined ? s.confidence : 0,
+            timestamp: s.timestamp !== undefined ? s.timestamp : new Date().toISOString(),
+          }));
+          setScans(items);
+        }
       })
       .catch(() => {
         let local = [];

@@ -102,7 +102,22 @@ export default function ResultPage() {
     let active = true;
     getScanDetail(id)
       .then((r) => {
-        if (active) setResult(r.data);
+        if (active) {
+          const res = r.data || {};
+          setResult({
+            ...res,
+            scanId: res.scanId !== undefined ? res.scanId : (res.scan_id !== undefined ? res.scan_id : ''),
+            mediaType: res.mediaType !== undefined ? res.mediaType : (res.media_type !== undefined ? res.media_type : 'UNKNOWN'),
+            fakeProbability: res.fakeProbability !== undefined ? res.fakeProbability : (res.fake_probability !== undefined ? res.fake_probability : 0),
+            realProbability: res.realProbability !== undefined ? res.realProbability : (res.real_probability !== undefined ? res.real_probability : 0),
+            riskLevel: res.riskLevel !== undefined ? res.riskLevel : (res.risk_level !== undefined ? res.risk_level : 'LOW'),
+            verdict: res.verdict !== undefined ? res.verdict : 'REAL',
+            confidence: res.confidence !== undefined ? res.confidence : 0,
+            explanations: res.explanations || [],
+            metadata: res.metadata || {},
+            timestamp: res.timestamp || new Date().toISOString(),
+          });
+        }
       })
       .catch(() => {
         if (active) {

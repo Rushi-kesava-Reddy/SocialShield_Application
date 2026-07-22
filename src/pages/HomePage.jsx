@@ -32,7 +32,25 @@ export default function HomePage() {
     // Try API, fall back to locally computed stats based on local history
     getUserStats()
       .then((r) => {
-        if (active) setStats(r.data);
+        if (active) {
+          const d = r.data || {};
+          let local = [];
+          try {
+            local = JSON.parse(localStorage.getItem('ss_local_history') || '[]');
+          } catch { /* ignore */ }
+          
+          const backendTotal = d.totalScans !== undefined ? d.totalScans : (d.total_scans !== undefined ? d.total_scans : 0);
+          const backendFake = d.fakeDetected !== undefined ? d.fakeDetected : (d.fake_detected !== undefined ? d.fake_detected : 0);
+          const backendSuspicious = d.suspiciousDetected !== undefined ? d.suspiciousDetected : (d.suspicious_detected !== undefined ? d.suspicious_detected : 0);
+          const backendTrust = d.trustScore !== undefined ? d.trustScore : (d.trust_score !== undefined ? d.trust_score : 100);
+
+          const total = backendTotal + local.length;
+          const fake = backendFake + local.filter(s => s.verdict?.toUpperCase() === 'FAKE').length;
+          const suspicious = backendSuspicious + local.filter(s => s.verdict?.toUpperCase() === 'SUSPICIOUS').length;
+          const trust = total > 0 ? Math.max(10, Math.min(100, Math.round(100 - (fake * 8 + suspicious * 4) / total * 10))) : backendTrust;
+
+          setStats({ totalScans: total, fakeDetected: fake, suspiciousDetected: suspicious, trustScore: trust });
+        }
       })
       .catch(() => {
         let local = [];
@@ -51,7 +69,16 @@ export default function HomePage() {
 
     getHistory()
       .then((r) => {
-        if (active) setRecent(r.data?.items?.slice(0, 4) || []);
+        if (active) {
+          const items = (r.data?.items || []).map(s => ({
+            scanId: s.scanId !== undefined ? s.scanId : (s.scan_id !== undefined ? s.scan_id : ''),
+            mediaType: s.mediaType !== undefined ? s.mediaType : (s.media_type !== undefined ? s.media_type : 'UNKNOWN'),
+            verdict: s.verdict !== undefined ? s.verdict : '',
+            confidence: s.confidence !== undefined ? s.confidence : 0,
+            timestamp: s.timestamp !== undefined ? s.timestamp : new Date().toISOString(),
+          }));
+          setRecent(items.slice(0, 4));
+        }
       })
       .catch(() => {
         let local = [];
