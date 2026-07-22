@@ -138,6 +138,7 @@ export function AuthProvider({ children }) {
         });
         const auth     = getAuth(app);
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         const cred     = await signInWithPopup(auth, provider);
         const token    = await cred.user.getIdToken();
         const userData = { uid: cred.user.uid, email: cred.user.email, displayName: cred.user.displayName || cred.user.email?.split('@')[0] };
