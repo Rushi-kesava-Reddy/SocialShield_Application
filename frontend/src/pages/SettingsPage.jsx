@@ -200,26 +200,26 @@ export default function SettingsPage() {
 
         {/* About */}
         <Section title="About">
-          <Row label="Version" right={<span style={{ color:'rgba(255,255,255,0.4)', fontSize:13 }}>1.0.0</span>} />
-          <Row label="License" right={<span style={{ color:'rgba(255,255,255,0.4)', fontSize:13 }}>MIT</span>} />
+          <Row label="Version" right={<span className="text-muted" style={{ fontSize:13 }}>1.0.0</span>} />
+          <Row label="License" right={<span className="text-muted" style={{ fontSize:13 }}>MIT</span>} />
           <Row label="GitHub" right={<a href="https://github.com" target="_blank" rel="noreferrer" style={{ color:'var(--neon-blue)', fontSize:13, textDecoration:'none', fontWeight:600 }}>View Source ↗</a>} />
         </Section>
 
         {/* Danger */}
-        <div className="glass-card" style={{ border:'1px solid rgba(255,59,59,0.2)' }}>
+        <div className="glass-card danger-zone-card">
           <h3 style={{ fontSize:12, fontWeight:700, color:'var(--risk-high)', letterSpacing:1, marginBottom:16 }}>
             Danger Zone
           </h3>
           <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
             <button
-              className="btn-neon"
-              style={{ background:'rgba(255,59,59,0.12)', color:'var(--risk-high)', border:'1px solid rgba(255,59,59,0.3)', boxShadow:'none', height:40, fontSize:13 }}
+              className="btn-neon btn-danger-outline"
+              style={{ height:40, fontSize:13 }}
               onClick={handleClearHistory}
               disabled={clearing}
             >
               {clearing ? 'Clearing…' : '🗑️ Clear History'}
             </button>
-            <button id="logout-btn" className="btn-neon" style={{ background:'rgba(255,59,59,0.12)', color:'var(--risk-high)', border:'1px solid rgba(255,59,59,0.3)', boxShadow:'none', height:40, fontSize:13 }} onClick={handleLogout}>
+            <button id="logout-btn" className="btn-neon btn-danger-outline" style={{ height:40, fontSize:13 }} onClick={handleLogout}>
               🚪 Sign Out
             </button>
           </div>

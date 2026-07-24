@@ -43,14 +43,14 @@
 }
 
 body.light-mode {
-  --deep-black:   #f4f6fc;
+  --deep-black:   #f1f5f9;
   --dark-surface: #ffffff;
-  --dark-card:    #e8edf7;
-  --dark-elevated:#dae3f3;
-  --glass-white:  rgba(0, 0, 0, 0.04);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --dark-card:    #ffffff;
+  --dark-elevated:#f8fafc;
+  --glass-white:  #ffffff;
+  --glass-border: rgba(15, 23, 42, 0.08);
   background: var(--deep-black) !important;
-  color: #15152a !important;
+  color: #0f172a !important;
 }
 
 body.light-mode h1, 
@@ -59,7 +59,13 @@ body.light-mode h3,
 body.light-mode h4, 
 body.light-mode p,
 body.light-mode label {
-  color: #101020 !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .glass-card {
+  background: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(15, 23, 42, 0.02) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
 }
 
 body.light-mode .sidebar {
@@ -67,9 +73,15 @@ body.light-mode .sidebar {
   border-right: 1px solid var(--glass-border) !important;
 }
 
+body.light-mode .sidebar,
+body.light-mode .sidebar div,
+body.light-mode .sidebar span {
+  color: #1e293b !important;
+}
+
 body.light-mode .sidebar-logo, 
 body.light-mode .nav-item {
-  color: #333344 !important;
+  color: #475569 !important;
 }
 
 body.light-mode .nav-item:hover, 
@@ -799,3 +811,34 @@ html, body, #root {
 /* ─── Section spacing ────────────────────────────────────────────────────── */
 .section { padding: 0 28px 28px; }
 @media (max-width: 600px) { .section { padding: 0 16px 20px; } .page-header { padding: 20px 16px 0; } }
+
+/* ─── Danger Zone styling ────────────────────────────────────────────────── */
+.danger-zone-card {
+  border: 1px solid rgba(255, 59, 59, 0.2) !important;
+  background: rgba(255, 59, 59, 0.03) !important;
+}
+body.light-mode .danger-zone-card {
+  background: #fff5f5 !important;
+  border-color: #feb2b2 !important;
+}
+body.light-mode .danger-zone-card h3 {
+  color: #c53030 !important;
+}
+
+.btn-danger-outline {
+  background: rgba(255, 59, 59, 0.12) !important;
+  color: var(--risk-high) !important;
+  border: 1px solid rgba(255, 59, 59, 0.3) !important;
+  box-shadow: none !important;
+}
+.btn-danger-outline:hover {
+  background: rgba(255, 59, 59, 0.2) !important;
+}
+body.light-mode .btn-danger-outline {
+  background: #fff5f5 !important;
+  color: #c53030 !important;
+  border-color: #feb2b2 !important;
+}
+body.light-mode .btn-danger-outline:hover {
+  background: #fed7d7 !important;
+}

@@ -57,11 +57,11 @@ export default function Layout() {
 
           {/* User info */}
           <div style={{ padding: '12px', borderRadius: '12px', background: 'var(--glass-white)', border: '1px solid var(--glass-border)' }}>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 3 }}>Signed in as</div>
+            <div className="text-muted" style={{ fontSize: 11, marginBottom: 3 }}>Signed in as</div>
             <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.displayName || user?.email || 'User'}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 }}>
+            <div className="text-muted" style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 }}>
               {user?.email}
             </div>
           </div>
