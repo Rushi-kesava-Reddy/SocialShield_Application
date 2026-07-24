@@ -247,7 +247,7 @@ async def save_scan_result_and_update_stats(user_id: str, scan_id: str, result: 
                 
             verdict = result_camel.get("verdict", "SAFE").upper()
             total_scans += 1
-            if verdict == "SAFE":
+            if verdict in ("SAFE", "REAL"):
                 safe_detected += 1
             elif verdict == "SUSPICIOUS":
                 suspicious_detected += 1

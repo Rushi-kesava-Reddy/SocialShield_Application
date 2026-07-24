@@ -158,7 +158,7 @@ async def get_user_stats(user_id: str = Depends(get_current_user)):
         total = len(docs)
         fake_count = sum(1 for d in docs if str(d.to_dict().get('verdict')).upper() == 'FAKE')
         suspicious = sum(1 for d in docs if str(d.to_dict().get('verdict')).upper() == 'SUSPICIOUS')
-        safe_count = sum(1 for d in docs if str(d.to_dict().get('verdict')).upper() == 'SAFE')
+        safe_count = sum(1 for d in docs if str(d.to_dict().get('verdict')).upper() in ('SAFE', 'REAL'))
         
         trust_score = 100
         if total > 0:
