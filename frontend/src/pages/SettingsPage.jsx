@@ -16,7 +16,7 @@ function Toggle({ id, checked, onChange }) {
 function Section({ title, children }) {
   return (
     <div className="glass-card" style={{ marginBottom: 16 }}>
-      <h3 style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginBottom: 16 }}>
+      <h3 className="text-muted" style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 16 }}>
         {title}
       </h3>
       {children}
@@ -26,10 +26,10 @@ function Section({ title, children }) {
 
 function Row({ label, desc, right }) {
   return (
-    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 0', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 0', borderBottom:'1px solid var(--glass-border)' }}>
       <div>
         <div style={{ fontWeight: 500, fontSize: 14 }}>{label}</div>
-        {desc && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{desc}</div>}
+        {desc && <div className="text-muted" style={{ fontSize: 12, marginTop: 2 }}>{desc}</div>}
       </div>
       {right}
     </div>
@@ -141,7 +141,7 @@ export default function SettingsPage() {
             ) : (
               <>
                 <div style={{ fontWeight:700, fontSize:16 }}>{user?.displayName || 'Shield User'}</div>
-                <div style={{ color:'rgba(255,255,255,0.45)', fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.email}</div>
+                <div className="text-muted" style={{ fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.email}</div>
                 <div style={{ marginTop:4 }}>
                   <span style={{ fontSize:11, background:'rgba(0,212,255,0.15)', border:'1px solid rgba(0,212,255,0.3)', color:'var(--neon-blue)', padding:'2px 10px', borderRadius:20, fontWeight:600 }}>
                     Pro Plan
@@ -187,11 +187,11 @@ export default function SettingsPage() {
               <div key={name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:`${color}08`, border:`1px solid ${color}20`, borderRadius:'var(--r-md)' }}>
                 <div>
                   <div style={{ fontWeight:600, fontSize:14 }}>{name}</div>
-                  <div style={{ fontSize:12, color:'rgba(255,255,255,0.45)' }}>{purpose}</div>
+                  <div className="text-muted" style={{ fontSize:12 }}>{purpose}</div>
                 </div>
                 <div style={{ textAlign:'right' }}>
                   <div style={{ color, fontWeight:700, fontSize:15 }}>{acc}</div>
-                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.3)' }}>accuracy</div>
+                  <div className="text-muted" style={{ fontSize:11 }}>accuracy</div>
                 </div>
               </div>
             ))}

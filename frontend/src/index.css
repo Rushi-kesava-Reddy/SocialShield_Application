@@ -124,6 +124,20 @@ body.light-mode .toggle-switch input:checked + .toggle-slider {
   border-color: var(--neon-blue) !important;
 }
 
+/* ─── Muted Text Helper ─── */
+.text-muted {
+  color: rgba(255, 255, 255, 0.45);
+}
+body.light-mode .text-muted {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Force dark text inside glass-cards in light mode for generic div labels */
+body.light-mode .glass-card,
+body.light-mode .glass-card div {
+  color: #101020 !important;
+}
+
 html, body, #root {
   height: 100%;
   width: 100%;
