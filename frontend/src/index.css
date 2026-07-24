@@ -107,6 +107,23 @@ body.light-mode .stat-label {
   color: rgba(0, 0, 0, 0.6) !important;
 }
 
+body.light-mode .toggle-slider {
+  background: rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .toggle-slider::before {
+  background: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+  top: 2px !important;
+  left: 2px !important;
+}
+
+body.light-mode .toggle-switch input:checked + .toggle-slider {
+  background: var(--neon-blue) !important;
+  border-color: var(--neon-blue) !important;
+}
+
 html, body, #root {
   height: 100%;
   width: 100%;
