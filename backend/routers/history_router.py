@@ -181,8 +181,9 @@ async def get_user_stats(user_id: str = Depends(get_current_user)):
             "total_scans": total,
             "fake_detected": fake_count,
             "suspicious_detected": suspicious,
+            "safe_detected": safe_count,
             "trust_score": trust_score
         }
     except Exception as e:
         logger.error(f"Failed to get stats: {e}")
-        return {"total_scans": 0, "fake_detected": 0, "suspicious_detected": 0, "trust_score": 100}
+        return {"total_scans": 0, "fake_detected": 0, "suspicious_detected": 0, "safe_detected": 0, "trust_score": 100}

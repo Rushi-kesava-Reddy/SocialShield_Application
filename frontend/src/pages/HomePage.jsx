@@ -22,7 +22,7 @@ function VerdictBadge({ verdict }) {
 export default function HomePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ totalScans: 0, fakeDetected: 0, suspiciousDetected: 0, trustScore: 100 });
+  const [stats, setStats] = useState({ totalScans: 0, fakeDetected: 0, suspiciousDetected: 0, safeDetected: 0, trustScore: 100 });
   const [recent, setRecent] = useState([]);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -34,10 +34,11 @@ export default function HomePage() {
           totalScans: data.total_scans ?? data.totalScans ?? 0,
           fakeDetected: data.fake_detected ?? data.fakeDetected ?? 0,
           suspiciousDetected: data.suspicious_detected ?? data.suspiciousDetected ?? 0,
+          safeDetected: data.safe_detected ?? data.safeDetected ?? 0,
           trustScore: data.trust_score ?? data.trustScore ?? 100,
         });
       })
-      .catch(() => setStats({ totalScans: 0, fakeDetected: 0, suspiciousDetected: 0, trustScore: 100 }))
+      .catch(() => setStats({ totalScans: 0, fakeDetected: 0, suspiciousDetected: 0, safeDetected: 0, trustScore: 100 }))
       .finally(() => setStatsLoading(false));
 
     getHistory()
@@ -77,11 +78,12 @@ export default function HomePage() {
         </div>
 
         {/* Quick stats */}
-        <div className="grid-3" style={{ marginTop: 20, gridTemplateColumns: 'repeat(3,1fr)' }}>
+        <div className="grid-4" style={{ marginTop: 20 }}>
           {[
             { label: 'Total Scans', value: stats.totalScans, color: '#00D4FF' },
-            { label: 'Fake Detected', value: stats.fakeDetected, color: '#FF3B3B' },
+            { label: 'Safe Profiles', value: stats.safeDetected, color: '#06FFA5' },
             { label: 'Suspicious', value: stats.suspiciousDetected, color: '#FFB800' },
+            { label: 'Fake Detected', value: stats.fakeDetected, color: '#FF3B3B' },
           ].map(({ label, value, color }) => (
             <div key={label} className="stat-card">
               <div className="stat-value" style={{ color }}>{statsLoading ? '—' : value}</div>
