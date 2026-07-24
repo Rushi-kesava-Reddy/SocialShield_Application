@@ -79,16 +79,17 @@ export default function HistoryPage() {
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontWeight:600, fontSize:14 }}>{scan.mediaType} Scan</div>
-                  <div style={{ fontSize:12, color:'rgba(255,255,255,0.4)', marginTop:2 }}>
+                  <div className="text-muted" style={{ fontSize:12, marginTop:2 }}>
                     {new Date(scan.timestamp).toLocaleString()}
                   </div>
                 </div>
                 <div style={{ display:'flex', alignItems:'center', gap:12, flexShrink:0 }}>
                   <VerdictBadge verdict={scan.verdict} />
-                  <span style={{ color:'rgba(255,255,255,0.4)', fontSize:13 }}>{scan.confidence?.toFixed(0)}%</span>
+                  <span className="text-muted" style={{ fontSize:13 }}>{scan.confidence?.toFixed(0)}%</span>
                   <button
                     onClick={(e) => handleDelete(scan.scanId, e)}
-                    style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(255,255,255,0.25)', fontSize:18, padding:4 }}
+                    className="text-muted"
+                    style={{ background:'none', border:'none', cursor:'pointer', fontSize:18, padding:4 }}
                     title="Delete"
                   >
                     🗑️
